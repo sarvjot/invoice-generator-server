@@ -44,7 +44,7 @@ const fillTemplate = (clientName, products) => {
 
 	let totalData = `<p>Subtotal: ${totalCost}</p>
 		<p>Discount: ${totalDiscount}</p>
-		<p>Total: ${totalAmount}</p>`
+		<p>Total: ₹${totalAmount}</p>`
 	
 	let finalTemplate = template
 		.replace("{{customerName}}", clientName)
@@ -62,8 +62,8 @@ const createBill = async (req, res) => {
 		for (const product of products) {
 			findItemPromises.push(Item.findById(product._id));
 		}
-		const foundItems = await Promise.all(findItemPromises);
-		foundItems.forEach((foundItem, index) => {
+		let foundItems = await Promise.all(findItemPromises);
+		foundItems = foundItems.map((foundItem, index) => {
 			if (!foundItem) {
 				throw new Error("Product not found");
 			}
@@ -71,15 +71,31 @@ const createBill = async (req, res) => {
 			if (foundItem.quantity < products[index].quantity) {
 				throw new Error("Insufficient quantity");
 			}
+
+			return { 
+				_id: products[index]._id,
+				name: foundItem.name,
+				price: foundItem.price,
+				quantity: products[index].quantity, 
+				discount: products[index].discount 
+			}
 		})
 
 		let updateItemPromises = [];
 		for (const product of products) {
-			updateItemPromises.push(Item.findByIdAndUpdate(product._id, { $inc: { quantity: -product.quantity } }))
+			updateItemPromises.push(Item.findByIdAndUpdate(product._id, { $inc: { quantity: -product.quantity } }, { new: true }))
 		}
-		await Promise.all(updateItemPromises);
+		const updatedProducts = await Promise.all(updateItemPromises);
 
-		return res.status(200).send(fillTemplate(clientName, products))
+		let deleteItemPromises = [];
+		for (const updatedProduct of updatedProducts) {
+			if (updatedProduct.quantity === 0) {
+				deleteItemPromises.push(Item.findByIdAndDelete(updatedProduct._id))	
+			}
+		}
+		await Promise.all(deleteItemPromises);
+
+		return res.status(200).send(fillTemplate(clientName, foundItems))
 	} catch (error) {
 		return res.status(400).json({ "error": error.message })
 	}

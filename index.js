@@ -13,16 +13,15 @@ mongoose
 
 mongoose.Promise = global.Promise;
 
-const app = express(cors());
+const app = express();
+app.use(cors({
+	origin: "http://localhost:3000",
+}));
 app.use(express.json());
 
 app.use("/api/item", itemRouter);
 app.use("/api/bill", billRouter);
 
-app.get("/", (req, res) => {
-	res.send("hello world");
-});
-
-app.listen(3000, () => {
+app.listen(8000, () => {
 	console.log("server started");
 });

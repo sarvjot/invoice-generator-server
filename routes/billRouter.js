@@ -3,6 +3,6 @@ import { billController } from '../controllers/index.js';
 
 const router = express.Router();
 
-router.get('/', billController.createController);
+router.post('/', billController.createController);
 
 export default router;

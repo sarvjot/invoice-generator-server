@@ -17,8 +17,13 @@ const createItem = async (req, res) => {
 
 const listItems = async (req, res) => {
 	try {
-		const items = await Item.find()
-		return res.status(200).json({items})
+    if (req.params.id) {
+      const item = await Item.findById(req.params.id);
+      return res.status(200).json({ item });
+    } else {
+      const items = await Item.find();
+      return res.status(200).json({ items });
+    }
 	} catch (error) {
 		return res.status(400).json({ "error": error.message })
 	}
