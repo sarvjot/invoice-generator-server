@@ -1,10 +1,13 @@
 import express from "express";
 import mongoose from "mongoose";
 import cors from "cors";
+import dotenv from "dotenv";
+
+dotenv.config();
 
 import { itemRouter, billRouter } from './routes/index.js';
 
-const mongodbURI = "mongodb+srv://pittukadost:pittuthegreat@cluster0.6755wow.mongodb.net/?retryWrites=true&w=majority";
+const mongodbURI = process.env.MONGODB_URI;
 
 mongoose
     .connect(mongodbURI, { useNewUrlParser: true })
@@ -15,7 +18,7 @@ mongoose.Promise = global.Promise;
 
 const app = express();
 app.use(cors({
-	origin: "http://localhost:3000",
+	origin: process.env.CLIENT_URL,
 }));
 app.use(express.json());
 
