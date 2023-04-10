@@ -8,7 +8,10 @@ import { itemRouter, billRouter } from './routes/index.js';
 dotenv.config();
 
 mongoose
-    .connect(process.env.MONGODB_URI, { useNewUrlParser: true })
+    .connect(process.env.MONGODB_URI, { 
+		useNewUrlParser: true,  
+		useUnifiedTopology: true,
+	    })
     .then(() => console.log("Database Connected Successfully"))
     .catch((err) => console.log(err));
 
